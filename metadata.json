@@ -1,0 +1,6 @@
+{
+  "name": "StreamBox",
+  "description": "A video streaming platform utilizing TMDb for metadata and third-party embeds.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
