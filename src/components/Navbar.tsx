@@ -3,7 +3,7 @@ import { Search, Bell, User, PlaySquare, LogOut, Menu, X as CloseIcon } from 'lu
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile } from '../types';
 
-export type AppView = 'home' | 'tv' | 'movies' | 'latest' | 'search';
+export type AppView = 'home' | 'tv' | 'movies' | 'latest' | 'search' | 'admin';
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -71,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'home', label: 'Home' },
     { id: 'tv', label: 'TV Shows' },
     { id: 'movies', label: 'Movies' },
-    { id: 'latest', label: 'Latest' },
+    { id: 'latest', label: 'Latest' }, { id: 'admin', label: 'Admin' },
   ];
 
   return (

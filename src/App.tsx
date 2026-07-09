@@ -6,6 +6,7 @@ import { PlayerModal } from './components/PlayerModal';
 import { InfoModal } from './components/InfoModal';
 import { InfiniteGrid } from './components/InfiniteGrid';
 import { ProfileScreen } from './components/ProfileScreen';
+import { AdminArea } from "./components/AdminArea";
 import { Movie, UserProfile } from './types';
 import { 
   fetchTrending, 
@@ -206,6 +207,9 @@ export default function App() {
               onMovieClick={handleMovieSelect} 
               onMoreInfo={setInfoMovie}
             />
+          )}
+          {currentView === "admin" && (
+            <AdminArea />
           )}
         </>
       )}
