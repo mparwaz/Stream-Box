@@ -21,4 +21,5 @@ export interface UserProfile {
   name: string;
   avatar: string;
   continueWatching?: Movie[];
+  myList?: Movie[];
 }

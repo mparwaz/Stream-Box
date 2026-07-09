@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Movie } from '../types';
-import { X, Play, Youtube } from 'lucide-react';
+import { X, Play, Youtube, Plus, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { getImageUrl, fetchMovieVideos, fetchTvVideos } from '../api';
 import { TrailerModal } from './TrailerModal';
@@ -9,9 +9,11 @@ interface InfoModalProps {
   movie: Movie | null;
   onClose: () => void;
   onPlay: (movie: Movie) => void;
+  inMyList?: boolean;
+  onToggleMyList?: (movie: Movie) => void;
 }
 
-export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay }) => {
+export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay, inMyList, onToggleMyList }) => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
 
@@ -97,6 +99,15 @@ export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay }) 
                   >
                     <Youtube className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
                     Trailer
+                  </button>
+                )}
+                {onToggleMyList && (
+                  <button
+                    onClick={() => onToggleMyList(movie)}
+                    className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-zinc-800/80 hover:bg-zinc-700 text-white rounded-full transition-colors backdrop-blur-sm border border-zinc-500/30"
+                    title={inMyList ? "Remove from My List" : "Add to My List"}
+                  >
+                    {inMyList ? <Check className="h-5 w-5 md:h-6 md:w-6" /> : <Plus className="h-5 w-5 md:h-6 md:w-6" />}
                   </button>
                 )}
               </div>

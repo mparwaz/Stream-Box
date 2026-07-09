@@ -3,7 +3,7 @@ import { Search, Bell, User, PlaySquare, LogOut, Menu, X as CloseIcon } from 'lu
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile } from '../types';
 
-export type AppView = 'home' | 'tv' | 'movies' | 'latest' | 'search' | 'admin';
+export type AppView = 'home' | 'tv' | 'movies' | 'latest' | 'account' | 'search' | 'admin';
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -71,7 +71,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'home', label: 'Home' },
     { id: 'tv', label: 'TV Shows' },
     { id: 'movies', label: 'Movies' },
-    { id: 'latest', label: 'Latest' }, { id: 'admin', label: 'Admin' },
+    { id: 'latest', label: 'Latest' },
+    { id: 'admin', label: 'Admin' },
   ];
 
   return (
@@ -212,8 +213,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <p className="text-sm font-medium text-zinc-300 truncate">{currentProfile?.name || 'Guest'}</p>
                     </div>
                     <button 
-                      onClick={() => { setShowProfileMenu(false); onLogout(); }}
+                      onClick={() => { setShowProfileMenu(false); onViewChange('account'); }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2 mt-1"
+                    >
+                      <User className="h-4 w-4" />
+                      Account Settings
+                    </button>
+                    <button 
+                      onClick={() => { setShowProfileMenu(false); onLogout(); }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
                     >
                       <LogOut className="h-4 w-4" />
                       Switch Profile
@@ -267,6 +275,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="text-sm font-medium leading-none text-gray-400 mt-1">Manage Profile</div>
                   </div>
                 </div>
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); onViewChange('account'); }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2"
+                >
+                  <User className="h-5 w-5" />
+                  Account Settings
+                </button>
                 <button
                   onClick={() => { setIsMobileMenuOpen(false); onLogout(); }}
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2"

@@ -6,6 +6,7 @@ import { PlayerModal } from './components/PlayerModal';
 import { InfoModal } from './components/InfoModal';
 import { InfiniteGrid } from './components/InfiniteGrid';
 import { ProfileScreen } from './components/ProfileScreen';
+import { AccountSettings } from './components/AccountSettings';
 import { AdminArea } from "./components/AdminArea";
 import { Movie, UserProfile } from './types';
 import { 
@@ -129,6 +130,33 @@ export default function App() {
     }
   };
 
+  const handleUpdateProfile = (updatedProfile: UserProfile) => {
+    setCurrentProfile(updatedProfile);
+    const updatedProfiles = profiles.map(p => p.id === updatedProfile.id ? updatedProfile : p);
+    setProfiles(updatedProfiles);
+    localStorage.setItem('streambox_profiles', JSON.stringify(updatedProfiles));
+    setCurrentView('home');
+  };
+
+  const handleToggleMyList = (movie: Movie) => {
+    if (currentProfile) {
+      const currentList = currentProfile.myList || [];
+      const inList = currentList.some(m => m.id === movie.id);
+      let updatedList;
+      if (inList) {
+        updatedList = currentList.filter(m => m.id !== movie.id);
+      } else {
+        updatedList = [movie, ...currentList];
+      }
+      const updatedProfile = { ...currentProfile, myList: updatedList };
+      setCurrentProfile(updatedProfile);
+      
+      const updatedProfiles = profiles.map(p => p.id === updatedProfile.id ? updatedProfile : p);
+      setProfiles(updatedProfiles);
+      localStorage.setItem('streambox_profiles', JSON.stringify(updatedProfiles));
+    }
+  };
+
   if (isConfigured === null) {
     return <div className="min-h-screen bg-zinc-950"></div>;
   }
@@ -188,6 +216,9 @@ export default function App() {
                 {currentProfile.continueWatching && currentProfile.continueWatching.length > 0 && (
                   <MovieRow title={`Continue Watching for ${currentProfile.name}`} movies={currentProfile.continueWatching} onMovieClick={handleMovieSelect} onMoreInfo={setInfoMovie} />
                 )}
+                {currentProfile.myList && currentProfile.myList.length > 0 && (
+                  <MovieRow title="My List" movies={currentProfile.myList} onMovieClick={handleMovieSelect} onMoreInfo={setInfoMovie} />
+                )}
                 <MovieRow title="Trending Now" movies={trending} onMovieClick={handleMovieSelect} onMoreInfo={setInfoMovie} />
                 <MovieRow title="Popular" movies={popular} onMovieClick={handleMovieSelect} onMoreInfo={setInfoMovie} />
                 <MovieRow title="Top Rated" movies={topRated} onMovieClick={handleMovieSelect} onMoreInfo={setInfoMovie} />
@@ -236,6 +267,9 @@ export default function App() {
               onMoreInfo={setInfoMovie}
             />
           )}
+          {currentView === 'account' && (
+            <AccountSettings profile={currentProfile} onSave={handleUpdateProfile} />
+          )}
           {currentView === "admin" && (
             <AdminArea />
           )}
@@ -243,7 +277,13 @@ export default function App() {
       )}
 
       {infoMovie && (
-        <InfoModal movie={infoMovie} onClose={() => setInfoMovie(null)} onPlay={handleMovieSelect} />
+        <InfoModal 
+          movie={infoMovie} 
+          onClose={() => setInfoMovie(null)} 
+          onPlay={handleMovieSelect} 
+          inMyList={currentProfile.myList?.some(m => m.id === infoMovie.id)}
+          onToggleMyList={handleToggleMyList}
+        />
       )}
 
       {selectedMovie && (
