@@ -32,7 +32,7 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({ videoKey, onClose })
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl z-[101]"
+          className="relative w-full aspect-video md:aspect-auto md:h-[85vh] max-w-6xl bg-black rounded-xl overflow-hidden shadow-2xl z-[101]"
         >
           <button
             onClick={onClose}

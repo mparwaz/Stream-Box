@@ -98,7 +98,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ movie, onClose }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative w-full h-full md:h-auto max-w-6xl bg-black md:bg-zinc-950 md:rounded-lg overflow-hidden shadow-2xl md:border border-zinc-800 flex flex-col pt-[env(safe-area-inset-top)] md:pt-0"
+          className="relative w-full h-full md:h-[85vh] max-w-6xl bg-black md:bg-zinc-950 md:rounded-lg overflow-hidden shadow-2xl md:border border-zinc-800 flex flex-col pt-[env(safe-area-inset-top)] md:pt-0"
         >
           {showWarning && (
             <div className="bg-yellow-500/90 text-black text-xs md:text-sm px-4 py-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-4 shrink-0 w-full z-50">
@@ -192,7 +192,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ movie, onClose }) => {
           </div>
           
           <div className="w-full flex-grow bg-black relative flex items-center justify-center">
-            <div className="w-full h-full md:aspect-video relative">
+            <div className="w-full h-full relative">
               <iframe
                 src={embedUrl}
                 title={movie.title || movie.name}
