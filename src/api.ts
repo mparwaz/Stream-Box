@@ -92,3 +92,17 @@ export const getImageUrl = (path: string | null, size: 'w500' | 'original' = 'w5
   if (!path) return '';
   return `https://image.tmdb.org/t/p/${size}${path}`;
 };
+
+export const fetchMovieVideos = async (id: number): Promise<any[]> => {
+  const res = await fetch(buildUrl(`/movie/${id}/videos`));
+  if (!res.ok) throw new Error('Failed to fetch movie videos');
+  const data = await res.json();
+  return data.results || [];
+};
+
+export const fetchTvVideos = async (id: number): Promise<any[]> => {
+  const res = await fetch(buildUrl(`/tv/${id}/videos`));
+  if (!res.ok) throw new Error('Failed to fetch tv videos');
+  const data = await res.json();
+  return data.results || [];
+};

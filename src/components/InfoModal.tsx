@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Movie } from '../types';
-import { X, Play } from 'lucide-react';
+import { X, Play, Youtube } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { getImageUrl } from '../api';
+import { getImageUrl, fetchMovieVideos, fetchTvVideos } from '../api';
+import { TrailerModal } from './TrailerModal';
 
 interface InfoModalProps {
   movie: Movie | null;
@@ -11,9 +12,30 @@ interface InfoModalProps {
 }
 
 export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay }) => {
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [showTrailer, setShowTrailer] = useState(false);
+
   useEffect(() => {
     if (movie) {
       document.body.style.overflow = 'hidden';
+      
+      const fetchTrailer = async () => {
+        try {
+          const isTv = movie.media_type === 'tv' || movie.first_air_date !== undefined;
+          const videos = isTv ? await fetchTvVideos(movie.id) : await fetchMovieVideos(movie.id);
+          const trailer = videos.find((v: any) => v.type === 'Trailer' && v.site === 'YouTube') || videos.find((v: any) => v.site === 'YouTube');
+          if (trailer) {
+            setTrailerKey(trailer.key);
+          } else {
+            setTrailerKey(null);
+          }
+        } catch (e) {
+          console.error("Failed to fetch trailer", e);
+          setTrailerKey(null);
+        }
+      };
+      
+      fetchTrailer();
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -29,6 +51,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay }) 
   const year = (movie.release_date || movie.first_air_date || '')?.substring(0, 4);
 
   return (
+    <>
     <AnimatePresence>
       <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-12 overflow-y-auto">
         <div 
@@ -56,7 +79,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay }) 
             </button>
             <div className="absolute bottom-4 md:bottom-8 left-4 md:left-8 right-4">
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight drop-shadow-lg">{title}</h2>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => {
                     onClose();
@@ -67,6 +90,15 @@ export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay }) 
                   <Play className="h-5 w-5 md:h-6 md:w-6 fill-black" />
                   Play
                 </button>
+                {trailerKey && (
+                  <button
+                    onClick={() => setShowTrailer(true)}
+                    className="flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700 text-white px-6 py-2 md:py-2.5 rounded transition-colors font-semibold backdrop-blur-sm"
+                  >
+                    <Youtube className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
+                    Trailer
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -103,5 +135,13 @@ export const InfoModal: React.FC<InfoModalProps> = ({ movie, onClose, onPlay }) 
         </motion.div>
       </div>
     </AnimatePresence>
+      
+    {showTrailer && trailerKey && (
+      <TrailerModal 
+        videoKey={trailerKey} 
+        onClose={() => setShowTrailer(false)} 
+      />
+    )}
+    </>
   );
 };
