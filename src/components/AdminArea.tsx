@@ -8,39 +8,20 @@ export const AdminArea: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchConfig();
+    const savedKey = localStorage.getItem('streambox_tmdb_api_key');
+    if (savedKey) {
+      setTmdbApiKey(savedKey);
+    }
   }, []);
 
-  const fetchConfig = async () => {
-    try {
-      const res = await fetch('/api/admin/config');
-      if (res.ok) {
-        const data = await res.json();
-        setTmdbApiKey(data.tmdbApiKey || '');
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleSaveConfig = async (e: React.FormEvent) => {
+  const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
     setError('');
     try {
-      const res = await fetch('/api/admin/config', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ tmdbApiKey })
-      });
-      if (res.ok) {
-        setMessage('Configuration saved successfully. Reloading...');
-        setTimeout(() => window.location.reload(), 1500);
-      } else {
-        setError('Failed to save configuration');
-      }
+      localStorage.setItem('streambox_tmdb_api_key', tmdbApiKey);
+      setMessage('Configuration saved successfully. Reloading...');
+      setTimeout(() => window.location.reload(), 1500);
     } catch (e) {
       setError('An error occurred');
     }
@@ -56,7 +37,7 @@ export const AdminArea: React.FC = () => {
         <div className="flex justify-between items-center mb-8 pb-4 border-b border-zinc-800">
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Settings className="h-6 w-6 text-zinc-400" />
-            Admin Configuration
+            API Configuration
           </h1>
         </div>
 

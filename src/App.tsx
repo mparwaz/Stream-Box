@@ -43,17 +43,10 @@ export default function App() {
   const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if TMDB API Key is configured
-    fetch('/api/status')
-      .then(res => res.json())
-      .then(data => {
-        setIsConfigured(data.isConfigured);
-        if (data.isConfigured) {
-          loadHomeData();
-        }
-      })
-      .catch(() => setIsConfigured(false));
-
+    // Check if TMDB API Key is configured in localStorage
+    const savedKey = localStorage.getItem('streambox_tmdb_api_key');
+    setIsConfigured(!!savedKey);
+    
     // Load profiles from local storage
     const savedProfiles = localStorage.getItem('streambox_profiles');
     if (savedProfiles) {
@@ -87,11 +80,15 @@ export default function App() {
         }
       } catch (err: any) {
         console.error("Failed to fetch initial data", err);
-        setError("Failed to load movies. Ensure TMDB_API_KEY is set in your environment.");
+        setError("Failed to load movies. Ensure TMDB API Key is set correctly.");
       } finally {
         setIsInitialLoadDone(true);
       }
     };
+
+    if (savedKey) {
+      loadHomeData();
+    }
   }, []);
 
   const handleAddProfile = (newProfile: Omit<UserProfile, 'id'>) => {
