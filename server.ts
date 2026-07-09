@@ -35,38 +35,12 @@ app.get("/api/status", (req, res) => {
   res.json({ isConfigured: !!adminData.tmdbApiKey });
 });
 
-// Admin API
-app.post("/api/admin/register", (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: "Username and password required" });
-  if (adminData.admins[username]) return res.status(400).json({ error: "Admin already exists" });
-  
-  adminData.admins[username] = hashPassword(password);
-  saveAdminData();
-  res.json({ success: true });
-});
-
-app.post("/api/admin/login", (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: "Username and password required" });
-  
-  if (adminData.admins[username] && adminData.admins[username] === hashPassword(password)) {
-    res.json({ success: true, token: username }); // Simple token for this demo
-  } else {
-    res.status(401).json({ error: "Invalid credentials" });
-  }
-});
-
+// Config API
 app.get("/api/admin/config", (req, res) => {
-  const auth = req.headers.authorization;
-  if (!auth || !adminData.admins[auth]) return res.status(401).json({ error: "Unauthorized" });
   res.json({ tmdbApiKey: adminData.tmdbApiKey });
 });
 
 app.post("/api/admin/config", (req, res) => {
-  const auth = req.headers.authorization;
-  if (!auth || !adminData.admins[auth]) return res.status(401).json({ error: "Unauthorized" });
-  
   const { tmdbApiKey } = req.body;
   if (tmdbApiKey !== undefined) {
     adminData.tmdbApiKey = tmdbApiKey;
