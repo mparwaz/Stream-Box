@@ -98,7 +98,8 @@ export const AdminArea: React.FC = () => {
         body: JSON.stringify({ tmdbApiKey })
       });
       if (res.ok) {
-        setMessage('Configuration saved successfully.');
+        setMessage('Configuration saved successfully. Reloading...');
+        setTimeout(() => window.location.reload(), 1500);
       } else {
         setError('Failed to save configuration');
       }

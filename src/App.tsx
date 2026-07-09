@@ -40,7 +40,20 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
 
+  const [isConfigured, setIsConfigured] = useState<boolean | null>(null);
+
   useEffect(() => {
+    // Check if TMDB API Key is configured
+    fetch('/api/status')
+      .then(res => res.json())
+      .then(data => {
+        setIsConfigured(data.isConfigured);
+        if (data.isConfigured) {
+          loadHomeData();
+        }
+      })
+      .catch(() => setIsConfigured(false));
+
     // Load profiles from local storage
     const savedProfiles = localStorage.getItem('streambox_profiles');
     if (savedProfiles) {
@@ -79,8 +92,6 @@ export default function App() {
         setIsInitialLoadDone(true);
       }
     };
-    
-    loadHomeData();
   }, []);
 
   const handleAddProfile = (newProfile: Omit<UserProfile, 'id'>) => {
@@ -120,6 +131,26 @@ export default function App() {
       localStorage.setItem('streambox_profiles', JSON.stringify(updatedProfiles));
     }
   };
+
+  if (isConfigured === null) {
+    return <div className="min-h-screen bg-zinc-950"></div>;
+  }
+
+  if (isConfigured === false) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white overflow-x-hidden pb-12">
+        <Navbar 
+          onSearch={handleSearch} 
+          onClearSearch={() => { setSearchQuery(''); setCurrentView('home'); }} 
+          currentView="admin"
+          onViewChange={(view) => { setSearchQuery(''); setCurrentView(view); }}
+          currentProfile={null}
+          onLogout={() => {}}
+        />
+        <AdminArea />
+      </div>
+    );
+  }
 
   if (!currentProfile) {
     return (

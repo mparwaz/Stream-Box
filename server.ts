@@ -11,7 +11,7 @@ app.use(express.json());
 
 const CONFIG_FILE = path.join(process.cwd(), "admin_data.json");
 let adminData = {
-  tmdbApiKey: process.env.TMDB_API_KEY || "bf9139c03c93a2f46e389f8907fb107d",
+  tmdbApiKey: "",
   admins: {} as Record<string, string> // username -> password hash
 };
 
@@ -29,6 +29,11 @@ const saveAdminData = () => {
 };
 
 const hashPassword = (password: string) => crypto.createHash("sha256").update(password).digest("hex");
+
+// Status API
+app.get("/api/status", (req, res) => {
+  res.json({ isConfigured: !!adminData.tmdbApiKey });
+});
 
 // Admin API
 app.post("/api/admin/register", (req, res) => {
