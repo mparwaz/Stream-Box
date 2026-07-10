@@ -106,3 +106,9 @@ export const fetchTvVideos = async (id: number): Promise<any[]> => {
   const data = await res.json();
   return data.results || [];
 };
+export const fetchUpcoming = async (page = 1): Promise<Movie[]> => {
+  const res = await fetch(buildUrl(`/movie/upcoming?page=${page}`));
+  if (!res.ok) throw new Error('Failed to fetch upcoming');
+  const data = await res.json();
+  return data.results || [];
+};

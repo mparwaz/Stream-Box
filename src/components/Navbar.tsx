@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Bell, User, PlaySquare, LogOut, Menu, X as CloseIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserProfile } from '../types';
+import { UserProfile, Movie } from '../types';
+import { fetchUpcoming } from '../api';
 
 export type AppView = 'home' | 'tv' | 'movies' | 'latest' | 'account' | 'search' | 'admin';
 
@@ -26,6 +27,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Movie[]>([]);
+  const [hasUnread, setHasUnread] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -49,8 +52,31 @@ export const Navbar: React.FC<NavbarProps> = ({
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
+
+    const loadNotifications = async () => {
+      try {
+        const up = await fetchUpcoming(1);
+        const top5 = up.slice(0, 5);
+        setNotifications(top5);
+        
+        const newIds = top5.map(m => m.id).join(',');
+        const storedIds = localStorage.getItem('streambox_last_notifs') || '';
+        if (newIds !== storedIds && top5.length > 0) {
+          setHasUnread(true);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications", err);
+      }
+    };
+    
+    let interval: NodeJS.Timeout;
+    if (localStorage.getItem('streambox_tmdb_api_key')) {
+      loadNotifications();
+      interval = setInterval(loadNotifications, 60000);
+    }
     
     return () => {
+      if (interval) clearInterval(interval);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -149,14 +175,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             
             <div className="relative hidden sm:block" ref={notifRef}>
               <button 
-                onClick={() => setShowNotifications(!showNotifications)}
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  if (!showNotifications) {
+                    setHasUnread(false);
+                    const ids = notifications.map(m => m.id).join(',');
+                    localStorage.setItem('streambox_last_notifs', ids);
+                  }
+                }}
                 className="text-gray-300 hover:text-white relative"
               >
                 <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                </span>
+                {hasUnread && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                  </span>
+                )}
               </button>
               
               <AnimatePresence>
@@ -171,17 +206,33 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <h3 className="text-sm font-semibold text-white">Notifications</h3>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
-                      {[
-                        { title: 'New Arrival', desc: 'The Latest Blockbuster is now available.', time: '2 hours ago' },
-                        { title: 'Trending', desc: 'Check out what everyone is watching.', time: '1 day ago' },
-                        { title: 'Continue Watching', desc: 'Pick up where you left off.', time: '2 days ago' }
-                      ].map((notif, i) => (
-                        <div key={i} className="px-4 py-3 hover:bg-zinc-800 cursor-pointer border-b border-zinc-800/50 last:border-0">
-                          <p className="text-sm font-medium text-white">{notif.title}</p>
-                          <p className="text-xs text-zinc-400 mt-1">{notif.desc}</p>
-                          <p className="text-xs text-zinc-500 mt-1">{notif.time}</p>
+                      {notifications.length > 0 ? (
+                        notifications.map((notif, i) => (
+                          <div 
+                            key={notif.id || i} 
+                            className="px-4 py-3 hover:bg-zinc-800 cursor-pointer border-b border-zinc-800/50 last:border-0 flex gap-3"
+                            onClick={() => {
+                              setShowNotifications(false);
+                              const query = notif.title || notif.name || '';
+                              setSearchQuery(query);
+                              onSearch(query);
+                            }}
+                          >
+                            {notif.poster_path && (
+                              <img src={`https://image.tmdb.org/t/p/w92${notif.poster_path}`} alt={notif.title || notif.name} className="w-10 h-14 object-cover rounded" />
+                            )}
+                            <div>
+                              <p className="text-sm font-medium text-white line-clamp-1">{notif.title || notif.name}</p>
+                              <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{notif.overview}</p>
+                              <p className="text-xs text-zinc-500 mt-1">New Arrival</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-6 text-center text-zinc-500 text-sm">
+                          No new notifications
                         </div>
-                      ))}
+                      )}
                     </div>
                   </motion.div>
                 )}
